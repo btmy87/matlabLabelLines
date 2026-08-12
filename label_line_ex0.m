@@ -21,7 +21,7 @@ ha.YLim = [-0.1, 1.1];
 label_line(h, Color=ha.XColor, yoffset=2);
 
 % multiple labels can be drawn with multiple position entries
-label_line(h, 0.1:0.2:0.9, location="below", sloped=true);
+label_line(h, 0.1:0.2:0.9, location="below", Sloped=true);
 % label_line(h, 0.7, location="below right", sloped=true);
 
 %% ex0.1 Demonstrate Position Options
@@ -74,7 +74,7 @@ for thisloc = locs
     title(thisloc, FontWeight="normal");
     drawnow;
     h = plot(x, y, "-", DisplayName="test");
-    label_line(h, 0:0.125:0.875, sloped=true, location=thisloc);
+    label_line(h, 0:0.125:0.875, Sloped=true, location=thisloc);
 end
 
 %% ex0.3 Line segment with nans
@@ -91,7 +91,7 @@ h = plot(x, y, DisplayName="f(x)=sqrt(x)");
 ha.XLim = [-0.1, 1.1];
 ha.YLim = [-0.1, 1.1];
 
-label_line(h, sloped=true);
+label_line(h, Sloped=true);
 
 %% ex0.4 alternating nans
 x = linspace(0, 1, 101);
@@ -104,7 +104,7 @@ h = plot(x, y, ".-", DisplayName="test");
 ha.XLim = [-0.1, 1.1];
 ha.YLim = [-0.1, 1.1];
 
-label_line(h, sloped=true);
+label_line(h, Sloped=true);
 
 %% ex0.5 singlular nans
 x = linspace(0, 1, 101);
@@ -117,6 +117,20 @@ h = plot(x, y, ".-", DisplayName="test");
 ha.XLim = [-0.1, 1.1];
 ha.YLim = [-0.1, 1.1];
 
-label_line(h, sloped=true);
+label_line(h, Sloped=true);
+
+%% ex0.6 Rotation
+x = linspace(0, 1, 101);
+y = sqrt(x);
+
+figure(Name="ex0.5 singular nans", Units="inches", Position=[1,1,6,4]);
+ha = axes;hold on;grid on;box on;
+h = plot(x, y, "-", DisplayName="test");
+ha.XLim = [-0.1, 1.1];
+ha.YLim = [-0.1, 1.1];
+
+label_line(h, 0.8, Sloped=true, String="Sloped");
+label_line(h, 0.5, Sloped=true, Rotation=10, String="Sloped + Rot.=10");
+label_line(h, 0.2, Sloped=false, Rotation=10, String="No Slope + Rot.=10");
 
 

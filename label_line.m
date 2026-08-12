@@ -6,6 +6,11 @@ function hlabel = label_line(h, pos, opts)
 % Each label drawn will force a call to drawnow, may be slow for a large
 % number of labels, but this is not the anticipated use case.
 %
+% Not all edge cases are handled well.  Some specific problem areas
+%  - relative position is based on an integrated length, some of this
+%  length may be offscreen.  Particularly troubling for a clipped plot
+%  approahcing infinity.
+%
 % INPUTS:
 %  h        - handle to graphics object
 %  pos      - relative position along line, defaults to 0.5
@@ -23,14 +28,15 @@ function hlabel = label_line(h, pos, opts)
 %              Defaults to "above"
 %  Color     - label string color, defaults to h.Color
 %  BackgroundColor - label background color, defaults to none
+%  Rotation  - Rotation angle in degrees, defaults to 0
+%              when Sloped is true, this is an adjustment to the base
+%              rotation angle
 %
 % OPTIONS (used for development, not recommended)
 %  baseOffset- Baseline offset in direction of location
 %
 % TODO: Implement text arrow option
-% TODO: Verify functionality in tiled layout
 % TODO: Consider x-position option to set label at specific x coord
-% TODO: Handle nan's between line segments
 
 arguments
     h (1, 1) matlab.graphics.chart.primitive.Line
@@ -46,6 +52,7 @@ arguments
     opts.Color = h.Color;
     opts.baseOffset (1, 1) double = 2; 
     opts.BackgroundColor = "none";
+    opts.Rotation (1, 1) double = 0;
 end
 
 % convert to screen coordinates
@@ -55,7 +62,7 @@ end
 [xs1, ys1] = patch_nans(xs, ys);
 
 % calculate point on line
-[xp, yp, ap] = find_point(xs1, ys1, pos);
+[xp, yp, ap] = find_point(xs1, ys1, pos, opts.Rotation);
 
 % place text box
 hlabel = gobjects(size(xp));
@@ -107,9 +114,9 @@ end
 function [x1, y1] = patch_nans(x, y)
 % removes any nans in preparation for parameterization
 
-% remove leading and trailing nans
-idx1 = find(~isnan(x) & ~isnan(y), 1, "first");
-idx2 = find(~isnan(x) & ~isnan(y), 1, "last");
+% remove leading and trailing nans/infs
+idx1 = find(isfinite(x) & isfinite(y), 1, "first");
+idx2 = find(isfinite(x) & isfinite(y), 1, "last");
 x1 = x(idx1:idx2);
 y1 = y(idx1:idx2);
 
@@ -118,7 +125,7 @@ y1 = y(idx1:idx2);
 
 end
 
-function [xp, yp, ap] = find_point(xs, ys, pos)
+function [xp, yp, ap] = find_point(xs, ys, pos, thetaAdj)
 % parameterize curve as a function of arc length
 % find point on parametric line
 
@@ -126,7 +133,7 @@ function [xp, yp, ap] = find_point(xs, ys, pos)
 if isscalar(xs)
     xp = xs;
     yp = ys;
-    ap = 0;
+    ap = thetaAdj;
     return;
 end
 
@@ -136,7 +143,7 @@ x1 = [];
 y1 = [];
 % idx1 = 1; % next point to process
 idx2 = 0; % last point processed
-flag = isnan(xs) | isnan(ys);
+flag = ~isfinite(xs) | ~isfinite(ys);
 while idx2 < length(xs)
     % skip any leading nans
     idx1 = find(~flag(idx2+1:end), 1)+idx2;
@@ -176,9 +183,10 @@ if isempty(t)
     xp = tempx(idx);
     yp = tempy(idx);
     if idx < length(tempx)
-        ap = atan2d(tempy(idx+1)-tempy(idx), tempx(idx+1)-tempx(idx));
+        ap = atan2d(tempy(idx+1)-tempy(idx), tempx(idx+1)-tempx(idx)) ...
+           + thetaAdj;
     else
-        ap = 0;
+        ap = thetaAdj;
     end
     return;
 end
@@ -204,7 +212,7 @@ fa = griddedInterpolant(ta, theta2);
 
 xp = fx(pos);
 yp = fy(pos);
-ap = fa(pos);
+ap = fa(pos)+thetaAdj;
 end
 
 function hlabel = make_text_box(xp, yp, theta, hf, opts)
@@ -259,13 +267,16 @@ hlabel = annotation(hf, "textbox", ...
     Position=[xp+xoffset2,yp+yoffset2,1, 1], ...
     FitBoxToText=true);
 
-if opts.Sloped
+if opts.Sloped || opts.Rotation ~= 0
     % save default position, with size containing text
     drawnow;
     pos = hlabel.Position;
     % copyobj(hlabel, hlabel.Parent);
 
     % rotate label
+    if ~opts.Sloped
+        theta=opts.Rotation;
+    end
     hlabel.Rotation = theta;
 
     % offset to correct for rotation about the lower left corner
