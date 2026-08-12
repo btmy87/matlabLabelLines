@@ -52,21 +52,29 @@ ha.YTick = [];
 
 %% ex0.2 Check slope calcs for all positions
 % plot labels around unit circle
-theta = linspace(0, 2*pi, 101);
+theta = linspace(0, 2*pi, 361);
 x = cos(theta);
 y = sin(theta);
 
 locs = ["above left", "above", "above right", ...
         "below left", "below", "below right"];
 
-figure(Name="ex0.2 Slope with Options", Units="inches", Position=[1,1,12,8])
-tiledlayout(2, 3);
+hf = figure(Name="ex0.2 Slope with Options", ...
+    Units="inches", Position=[1,1,12,8]);
+tiledlayout(2, 3, TileSpacing="compact", Padding="compact");
 for thisloc = locs
     ha = nexttile;hold on;box on;grid off
     ha.XLim = [-1, 1]*1.2;
     ha.YLim = [-1, 1]*1.2;
+    ha.XTick = [];
+    ha.YTick = [];
+    % ha.XAxis.Visible = "off";
+    % ha.YAxis.Visible = "off";
+    ha.Color = hf.Color;
     title(thisloc, FontWeight="normal");
+    drawnow;
     h = plot(x, y, "-", DisplayName="test");
-    label_line(h, 0:0.1:0.9, sloped=true, location=thisloc);
+    label_line(h, 0:0.125:0.875, sloped=true, location=thisloc);
 end
+
 

@@ -3,27 +3,29 @@ function hlabel = label_line(h, pos, opts)
 %
 % Prior to calling this function, the plot should be scaled to it's final
 % size.  The offsets and slope are done in screen coordinates.
+% Each label drawn will force a call to drawnow, may be slow for a large
+% number of labels, but this is not the anticipated use case.
 %
 % INPUTS:
 %  h        - handle to graphics object
 %  pos      - relative position along line, defaults to 0.5
 %             if given as array, multiple labels are placed
 % OPTIONS (name/value pairs)
-%  string    - label string, defaults to h.DisplayName
+%  String    - label string, defaults to h.DisplayName
 %  xoffset   - force additional offset in the X direction, points
 %  yoffset   - force additional offset in the Y direction, points
-%  sloped    - logical, default to false which displays text at 0 angle
-%  location  - string with location of label relative to plot.  Should be
+%  Sloped    - logical, default to false which displays text at 0 angle
+%              when sloped is true, x and y offsets are relative to the
+%              line angle
+%  Location  - string with location of label relative to plot.  Should be
 %              one of "above", "below", "left", "right", "above left", 
 %              "above right", "below left", "below right", "center".
 %              Defaults to "above"
-%  color     - label string color, defaults to h.Color
+%  Color     - label string color, defaults to h.Color
+%  BackgroundColor - label background color, defaults to none
 %
 % OPTIONS (used for development, not recommended)
 %  baseOffset- Baseline offset in direction of location
-%  baseOffsetBelow- Additional offset for symbols below line
-%                   Text baseline not at bottom of box, but capline is at
-%                   top
 %
 % TODO: Implement text arrow option
 % TODO: Verify functionality in tiled layout
@@ -33,9 +35,9 @@ function hlabel = label_line(h, pos, opts)
 arguments
     h (1, 1) matlab.graphics.chart.primitive.Line
     pos (1, :) double {mustBeInRange(pos, 0, 1, "inclusive")} = 0.5
-    opts.string (1, 1) string = h.DisplayName
-    opts.sloped (1, 1) logical = false;
-    opts.location (1, 1) string {mustBeMember(opts.location, ...
+    opts.String (1, 1) string = h.DisplayName
+    opts.Sloped (1, 1) logical = false;
+    opts.Location (1, 1) string {mustBeMember(opts.Location, ...
         ["above", "below", "left", "right", ...
         "above left", "above right", "below left", "below right", ...
         "center"])} = "above";
@@ -43,11 +45,11 @@ arguments
     opts.yoffset (1, 1) double = 0;
     opts.Color = h.Color;
     opts.baseOffset (1, 1) double = 2; 
-    opts.baseOffsetBelow (1, 1) double = 3;
+    opts.BackgroundColor = "none";
 end
 
 % convert to screen coordinates
-[xs, ys, scaleX, scaleY, hf, ha] = data_to_screen(h);
+[xs, ys, ~, ~, hf] = data_to_screen(h);
 
 % patch nan's
 [xs1, ys1] = patch_nans(xs, ys);
@@ -58,12 +60,12 @@ end
 % place text box
 hlabel = gobjects(size(xp));
 for i = 1:numel(xp)
-    hlabel(i) = make_text_box(xp(i), yp(i), ap(i), hf, ha, opts);
+    hlabel(i) = make_text_box(xp(i), yp(i), ap(i), hf, opts);
 end
 
 end
 
-function [xs, ys, scaleX, scaleY, hf, ha] = data_to_screen(h)
+function [xs, ys, scaleX, scaleY, hf] = data_to_screen(h)
 % convert data coordiantes to screen coordinates in points
 ha = h.Parent;
 x = h.XData - ha.XLim(1);
@@ -151,7 +153,7 @@ yp = fy(pos);
 ap = fa(pos);
 end
 
-function hlabel = make_text_box(xp, yp, theta, hf, ha, opts)
+function hlabel = make_text_box(xp, yp, theta, hf, opts)
 unitsOld = hf.Units;
 hf.Units = "points";
 
@@ -159,40 +161,51 @@ vert = "bottom";
 horz = "center";
 xoffset = 0;
 yoffset = opts.baseOffset;
-if contains(opts.location, "below")
+if contains(opts.Location, "below")
     vert = "top";
-    yoffset = -opts.baseOffset-opts.baseOffsetBelow;
-elseif contains(opts.location, "center")
+    yoffset = -opts.baseOffset;
+elseif contains(opts.Location, "center")
     vert = "middle";
     yoffset = 0;
 end
 
-if contains(opts.location, "left")
+if contains(opts.Location, "left")
     horz="right";
     xoffset = -opts.baseOffset;
-elseif contains(opts.location, "right")
+elseif contains(opts.Location, "right")
     horz="left";
     xoffset = opts.baseOffset;
 end
 
-xoffset = xoffset + opts.xoffset;
-yoffset = yoffset + opts.yoffset;
+xoffset1 = xoffset + opts.xoffset;
+yoffset1 = yoffset + opts.yoffset;
+
+if opts.Sloped
+    % shift offsets relative to angle
+    alpha = atan2d(yoffset1, xoffset1);
+    L = sqrt(xoffset1.^2+yoffset1.^2);
+    xoffset2 = -L*cosd(theta-alpha);
+    yoffset2 = -L*sind(theta-alpha);
+else
+    xoffset2 = xoffset1;
+    yoffset2 = yoffset1;
+end
 
 % place text box, will need to shift later
 hlabel = annotation(hf, "textbox", ...
-    String=opts.string, ...
+    String=opts.String, ...
     Color=opts.Color, ...
-    BackgroundColor=ha.Color, ...
+    BackgroundColor=opts.BackgroundColor, ...
     LineStyle="none", ...
     Margin=0, ...
     Units="points", ...
     VerticalAlignment=vert, ...
     HorizontalAlignment=horz, ...
     Interpreter="tex", ...
-    Position=[xp+xoffset,yp+yoffset,1, 1], ...
+    Position=[xp+xoffset2,yp+yoffset2,1, 1], ...
     FitBoxToText=true);
 
-if opts.sloped
+if opts.Sloped
     % save default position, with size containing text
     drawnow;
     pos = hlabel.Position;
@@ -204,21 +217,21 @@ if opts.sloped
     % offset to correct for rotation about the lower left corner
     % really want to rotate about the anchor point
     % no correction needed for "above right"
-    if opts.location == "above"
+    if opts.Location == "above"
         hlabel.Position(2) = pos(2) - 0.5*pos(3)*sind(theta);
         hlabel.Position(1) = pos(1) + 0.5*pos(3)*(1-cosd(theta));
-    elseif opts.location == "below"
+    elseif opts.Location == "below"
         L = sqrt(pos(4).^2 + 0.25*pos(3).^2);
         alpha = atand(pos(4)/(0.5*pos(3)));
         hlabel.Position(1) = pos(1) - L*cosd(theta+alpha) + 0.5*pos(3);
         hlabel.Position(2) = pos(2) - L*sind(theta+alpha) + pos(4);
-    elseif opts.location == "below right"
-        hlabel.Position(1) = pos(1) + pos(4)*cosd(theta);
-        hlabel.Position(2) = pos(2) + pos(4)*(1-sind(theta));
-    elseif opts.location == "above left"
+    elseif opts.Location == "below right"
+        hlabel.Position(1) = pos(1) + pos(4)*sind(theta);
+        hlabel.Position(2) = pos(2) + pos(4)*(1-cosd(theta));
+    elseif opts.Location == "above left"
         hlabel.Position(1) = pos(1) + pos(3)*(1-cosd(theta));
         hlabel.Position(2) = pos(2) - pos(3)*sind(theta);
-    elseif opts.location == "below left"
+    elseif opts.Location == "below left"
         L = sqrt(pos(4).^2+pos(3).^2);
         alpha = atand(pos(4)/pos(3));
         hlabel.Position(1) = pos(1) + pos(3) - L*cosd(theta+alpha);
