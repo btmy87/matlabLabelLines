@@ -130,21 +130,75 @@ if isscalar(xs)
     return;
 end
 
-dx = diff(xs);
-dy = diff(ys);
-ds = sqrt(dx.^2+dy.^2);
-theta = atan2d(dy, dx);
-t = [0, cumsum(ds)];
-t1 = t./t(end);
+t = [];
+theta = [];
+x1 = [];
+y1 = [];
+% idx1 = 1; % next point to process
+idx2 = 0; % last point processed
+flag = isnan(xs) | isnan(ys);
+while idx2 < length(xs)
+    % skip any leading nans
+    idx1 = find(~flag(idx2+1:end), 1)+idx2;
 
-fx = griddedInterpolant(t1, xs);
-fy = griddedInterpolant(t1, ys);
+    % process until next nan
+    idx2 = find(flag(idx1:end), 1) + idx1 - 2;
+    if isempty(idx2)
+        idx2 = length(xs);
+    end
+
+    % integrate t vector and calc theta vector
+    dx = diff(xs(idx1:idx2));
+    dy = diff(ys(idx1:idx2));
+    ds = sqrt(dx.^2+dy.^2);
+    theta1 = atan2d(dy, dx);
+    if isempty(theta1)
+        % theta1 = 0; % case where only a single point exists between nans
+        continue;
+    end
+    if isempty(t)
+        t = [0, cumsum(ds)];
+        theta = theta1;
+    else
+        t = [t, t(end)+eps(t(end)), cumsum(ds)+t(end)]; %#ok<AGROW>
+        theta = [theta, 0.5*(theta(end)+theta1(1)), theta1]; %#ok<AGROW>
+    end
+    x1 = [x1, xs(idx1:idx2)]; %#ok<AGROW>
+    y1 = [y1, ys(idx1:idx2)]; %#ok<AGROW>
+end
+if isempty(t)
+    warning("No segments of finite length, but I'll give it a go anyways");
+    tempx = xs(~flag);
+    tempy = ys(~flag);
+    idx = round(pos*length(tempx));
+    idx = min(idx, length(tempx));
+    idx = max(1, idx);
+    xp = tempx(idx);
+    yp = tempy(idx);
+    if idx < length(tempx)
+        ap = atan2d(tempy(idx+1)-tempy(idx), tempx(idx+1)-tempx(idx));
+    else
+        ap = 0;
+    end
+    return;
+end
+t1 = t./t(end);
+% after normalizing, eps may have collapsed
+for i = 2:length(t1)
+    t1(i) = max(t1(i), t1(i-1)+eps(t(i-1)));
+end
+
+fx = griddedInterpolant(t1, x1);
+fy = griddedInterpolant(t1, y1);
 
 % make angle interpolant, for widely spaced points, the angle needs to
 % change in discrete jumps
 ta = [t1(1), ...
   reshape([t1(2:end-1);t1(2:end-1)+eps(t1(2:end-1))], 1, []), ...
   t1(end)];
+for i = 2:length(ta)
+    ta(i) = max(ta(i), ta(i-1)+eps(ta(i-1)));
+end
 theta2 = reshape([theta; theta], 1, []);
 fa = griddedInterpolant(ta, theta2);
 

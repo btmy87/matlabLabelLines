@@ -77,4 +77,46 @@ for thisloc = locs
     label_line(h, 0:0.125:0.875, sloped=true, location=thisloc);
 end
 
+%% ex0.3 Line segment with nans
+x = linspace(0, 1, 101);
+y = sqrt(x);
+y(30) = nan;
+x(60) = nan;
+x(1:5) = nan;
+y(95:end) = nan;
+
+figure(Name="ex0.3 nan handling", Units="inches", Position=[1,1,6,4]);
+ha = axes;hold on;grid on;box on;
+h = plot(x, y, DisplayName="f(x)=sqrt(x)");
+ha.XLim = [-0.1, 1.1];
+ha.YLim = [-0.1, 1.1];
+
+label_line(h, sloped=true);
+
+%% ex0.4 alternating nans
+x = linspace(0, 1, 101);
+y = sqrt(x);
+y(1:2:end) = nan;
+
+figure(Name="ex0.4 all alternating nans", Units="inches", Position=[1,1,6,4]);
+ha = axes;hold on;grid on;box on;
+h = plot(x, y, ".-", DisplayName="test");
+ha.XLim = [-0.1, 1.1];
+ha.YLim = [-0.1, 1.1];
+
+label_line(h, sloped=true);
+
+%% ex0.5 singlular nans
+x = linspace(0, 1, 101);
+y = sqrt(x);
+y([20, 22, 24]) = nan;
+
+figure(Name="ex0.5 singular nans", Units="inches", Position=[1,1,6,4]);
+ha = axes;hold on;grid on;box on;
+h = plot(x, y, ".-", DisplayName="test");
+ha.XLim = [-0.1, 1.1];
+ha.YLim = [-0.1, 1.1];
+
+label_line(h, sloped=true);
+
 
