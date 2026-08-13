@@ -29,6 +29,9 @@ figure(Name="ex0.1 Location Options", Units="inches", Position=[1,1,6,4])
 ha = axes("defaultLineMarkerSize",12);hold on;box on;grid off
 ha.XLim = [-1, 3];
 ha.YLim = [-1, 2];
+ha.XTick = [];
+ha.YTick = [];
+
 h = plot(0, 0, ".", DisplayName="below left");
 label_line(h, location=h.DisplayName);
 
@@ -47,8 +50,8 @@ label_line(h, location=h.DisplayName);
 h = plot(2, 1, ".", DisplayName="above right");
 label_line(h, location=h.DisplayName);
 
-ha.XTick = [];
-ha.YTick = [];
+exportgraphics(gcf, "ex01.png");
+
 
 %% ex0.2 Check slope calcs for all positions
 % plot labels around unit circle
@@ -123,7 +126,7 @@ label_line(h, Sloped=true);
 x = linspace(0, 1, 101);
 y = sqrt(x);
 
-figure(Name="ex0.5 singular nans", Units="inches", Position=[1,1,6,4]);
+figure(Name="ex0.5 srotation", Units="inches", Position=[1,1,6,4]);
 ha = axes;hold on;grid on;box on;
 h = plot(x, y, "-", DisplayName="test");
 ha.XLim = [-0.1, 1.1];
@@ -133,4 +136,17 @@ label_line(h, 0.8, Sloped=true, String="Sloped");
 label_line(h, 0.5, Sloped=true, Rotation=10, String="Sloped + Rot.=10");
 label_line(h, 0.2, Sloped=false, Rotation=10, String="No Slope + Rot.=10");
 
+%% ex0.7
+x = linspace(0, 2*pi, 101);
+
+figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,6,4]);
+ha = axes;hold on;grid off;box on;
+ha.XLim = [0, 2*pi];
+ha.YLim = [-1, 1]*1.1;
+h = plot(x, sin(x), "-", DisplayName="sin(x)");
+label_line(h, 0.5, Sloped=true);
+
+h = plot(x, cos(x), "-", DisplayName="cos(x)");
+label_line(h, 0.25, Sloped=true);
+exportgraphics(gcf, "ex07.png");
 
