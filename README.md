@@ -3,7 +3,8 @@ Place MATLAB plot labels directly on lines, similar to pgfplots node option
 
 ## Basic usage
 Pass the line handle to `label_line`.  The axis limits and size
-must be set prior to calling `label_line`.
+must be set prior to calling `label_line`, along with any axis scale
+changes.
 The `Sloped=true` option rotates the label to align with the local line
 direction.  The first positional argument specifies the relative position
 of the label along the line.
@@ -54,7 +55,6 @@ label_line(h, location=h.DisplayName);
 ![LocationOpts](ex01.png)
 
 ## Known Limitations
-- Does not handle log scales.
 - Can generate invalid positions if the line extends beyond the plot box.
   Only signfiicant when line extends beyond the box or approaches infinity.
 

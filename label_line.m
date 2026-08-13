@@ -45,10 +45,8 @@ function hlabel = label_line(h, pos, opts)
 %
 % TODO: Add pin option
 % TODO: Consider x-position option to set label at specific x coord
-% TODO: Support log scales
 
 arguments
-    % h (1, 1) matlab.graphics.chart.primitive.Line
     h (1, 1) {mustBeA(h, [ ...
         "matlab.graphics.chart.primitive.Line", ...
         "matlab.graphics.chart.primitive.Scatter"])}
@@ -95,8 +93,6 @@ end
 function [xs, ys, scaleX, scaleY, hf] = data_to_screen(h)
 % convert data coordiantes to screen coordinates in points
 ha = h.Parent;
-x = h.XData - ha.XLim(1);
-y = h.YData - ha.YLim(1);
 
 % walk up parent chain until we find a figure
 hf = ha;
@@ -113,8 +109,6 @@ assert(foundFigure, "No figure found in axes parent tree");
 POINTS_PER_INCH = 72;
 DPI = get(groot, "ScreenPixelsPerInch");
 
-dataWidth = ha.XLim(2) - ha.XLim(1);
-dataHeight = ha.YLim(2) - ha.YLim(1);
 pos = getpixelposition(ha)./DPI.*POINTS_PER_INCH;
 screenWidth = pos(3);
 screenHeight = pos(4);
@@ -122,11 +116,26 @@ screenHeight = pos(4);
 % inferred aspect raito from pixelposition doesn't match what's actually on
 % screen.  Actual display aligns with PlotBoxAspectRatio.  This correction
 % seems to work
+if ha.XScale == "linear"
+    x = h.XData - ha.XLim(1);
+    dataWidth = ha.XLim(2) - ha.XLim(1);
+else % log scale
+    x = log10(h.XData) - log10(ha.XLim(1));
+    dataWidth = log10(ha.XLim(2)) - log10(ha.XLim(1));
+end
 scaleX = screenWidth./dataWidth;
-scaleY = screenHeight./dataHeight ...
-  .* ha.PlotBoxAspectRatio(2)./ha.PlotBoxAspectRatio(1) ...
-  .* screenWidth./screenHeight;
 xs = x.*scaleX+pos(1);
+
+if ha.YScale == "linear"
+    y = h.YData - ha.YLim(1);
+    dataHeight = ha.YLim(2) - ha.YLim(1);
+else
+    y = log10(h.YData) - log10(ha.YLim(1));
+    dataHeight = log10(ha.YLim(2)) - log10(ha.YLim(1));
+end
+scaleY = screenHeight./dataHeight ...
+    .* ha.PlotBoxAspectRatio(2)./ha.PlotBoxAspectRatio(1) ...
+    .* screenWidth./screenHeight;
 ys = y.*scaleY+pos(2);
 
 end

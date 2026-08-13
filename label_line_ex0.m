@@ -154,12 +154,36 @@ exportgraphics(gcf, "ex07.png");
 %% ex0.8 scatter
 x = linspace(0, 2*pi, 51);
 
-figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,6,4]);
+figure(Name="ex0.8 scatter", Units="inches", Position=[1,1,6,4]);
 ha = axes;hold on;grid off;box on;
 ha.XLim = [0, 2*pi];
 ha.YLim = [-1, 1]*1.1;
 h = scatter(x, sin(x), 30, sin(x), "filled", DisplayName="sin(x)");
 label_line(h, 0.5, Sloped=true);
+
+%% ex0.9 log
+x = linspace(1, 10, 100);
+figure(Name="ex0.9 log", Units="inches", Position=[1,1,12,4])
+tiledlayout(1, 3);
+
+ha = nexttile;hold on;box on;grid on;
+title("Semi-Log X", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+ha.XScale = "log";
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+
+ha = nexttile;hold on;box on;grid on;
+title("Semi-Log Y", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+ha.YScale = "log";
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+
+ha = nexttile;hold on;box on;grid on;
+title("Log-Log", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+ha.XScale = "log";
+ha.YScale = "log";
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
 
 
 
