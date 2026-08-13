@@ -150,3 +150,17 @@ h = plot(x, cos(x), "-", DisplayName="cos(x)");
 label_line(h, 0.25, Sloped=true);
 exportgraphics(gcf, "ex07.png");
 
+
+%% ex0.8 scatter
+x = linspace(0, 2*pi, 51);
+
+figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,6,4]);
+ha = axes;hold on;grid off;box on;
+ha.XLim = [0, 2*pi];
+ha.YLim = [-1, 1]*1.1;
+h = scatter(x, sin(x), 30, sin(x), "filled", DisplayName="sin(x)");
+label_line(h, 0.5, Sloped=true);
+
+
+
+

@@ -8,7 +8,7 @@ function hlabel = label_line(h, pos, opts)
 %
 % Not all edge cases are handled well.  Some specific problem areas
 %  - relative position is based on an integrated length, some of this
-%  length may be offscreen.  Particularly troubling for a clipped plot
+%  length may be off-screen.  Particularly troubling for a clipped plot
 %  approahcing infinity.
 %
 % INPUTS:
@@ -34,12 +34,24 @@ function hlabel = label_line(h, pos, opts)
 %
 % OPTIONS (used for development, not recommended)
 %  baseOffset- Baseline offset in direction of location
+%  baseOffsetBelow - Additional offset in the below direction
+%                    When above, an additional effective offset is visible
+%                    because the text baseline is not at the bottom of the
+%                    box
 %
-% TODO: Implement text arrow option
+% Notes
+%  - Does not work with xline or yline, but these contain their own
+%    label options
+%
+% TODO: Add pin option
 % TODO: Consider x-position option to set label at specific x coord
+% TODO: Support log scales
 
 arguments
-    h (1, 1) matlab.graphics.chart.primitive.Line
+    % h (1, 1) matlab.graphics.chart.primitive.Line
+    h (1, 1) {mustBeA(h, [ ...
+        "matlab.graphics.chart.primitive.Line", ...
+        "matlab.graphics.chart.primitive.Scatter"])}
     pos (1, :) double {mustBeInRange(pos, 0, 1, "inclusive")} = 0.5
     opts.String (1, 1) string = h.DisplayName
     opts.Sloped (1, 1) logical = false;
@@ -49,10 +61,18 @@ arguments
         "center"])} = "above";
     opts.xoffset (1, 1) double = 0;
     opts.yoffset (1, 1) double = 0;
-    opts.Color = h.Color;
+    opts.Color = [];
     opts.baseOffset (1, 1) double = 2; 
+    opts.baseOffsetBelow (1, 1) double = 2;
     opts.BackgroundColor = "none";
     opts.Rotation (1, 1) double = 0;
+end
+
+% default color based on type
+if isempty(opts.Color) && isa(h, "matlab.graphics.chart.primitive.Line")
+    opts.Color = h.Color;
+elseif isempty(opts.Color) && isa(h, "matlab.graphics.chart.primitive.Scatter")
+    opts.Color = h.Parent.XColor;
 end
 
 % convert to screen coordinates
@@ -225,7 +245,7 @@ xoffset = 0;
 yoffset = opts.baseOffset;
 if contains(opts.Location, "below")
     vert = "top";
-    yoffset = -opts.baseOffset;
+    yoffset = -opts.baseOffset-opts.baseOffsetBelow;
 elseif contains(opts.Location, "center")
     vert = "middle";
     yoffset = 0;

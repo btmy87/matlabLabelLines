@@ -52,3 +52,22 @@ h = plot(2, 1, ".", DisplayName="above right");
 label_line(h, location=h.DisplayName);
 ```
 ![LocationOpts](ex01.png)
+
+## Known Limitations
+- Does not handle log scales.
+- Can generate invalid positions if the line extends beyond the plot box.
+  Only signfiicant when line extends beyond the box or approaches infinity.
+
+## References
+Initial inspiration came from practice of using a node
+in the trailing plot commands within [pgfplot](https://tikz.dev/pgfplots/reference-annotations#sec-4.17.3)
+
+The [NoLegend](https://www.mathworks.com/matlabcentral/fileexchange/51163-nolegend-labeling-lines-directly-instead-of-using-legends)
+package performs a similar task.  It does handle log scales, but it
+has limited location options and does not rotate labels.
+
+The [label](https://www.mathworks.com/matlabcentral/fileexchange/47421-label)
+package handles label location, but uses different positioning controls.
+
+
+
