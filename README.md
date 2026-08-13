@@ -23,6 +23,41 @@ label_line(h, 0.25, Sloped=true);
 ```
 ![basic_ex](ex07.png)
 
+## Axis Options
+Linear, semi-log, and log-log axes are supported.  Any changes to 
+`XScale` or `YScale` should be done before drawing the label.
+
+``` matlab
+x = linspace(1, 10, 100);
+figure(Name="ex0.9 log", Units="inches", Position=[1,1,6, 6])
+tiledlayout(2, 2, TileSpacing="compact", Padding="compact");
+
+ha = nexttile;hold on;box on;grid on;
+title("Linear", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+
+ha = nexttile;hold on;box on;grid on;
+title("Semi-Log X", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+ha.XScale = "log";
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+
+ha = nexttile;hold on;box on;grid on;
+title("Semi-Log Y", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+ha.YScale = "log";
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+
+ha = nexttile;hold on;box on;grid on;
+title("Log-Log", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+ha.XScale = "log";
+ha.YScale = "log";
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+```
+![log_ex](ex09.png)
+
 ## Location Options
 The `Location=XXX` option can be passed to `label_line`.  The default
 option places the label above the line.
@@ -57,10 +92,12 @@ label_line(h, location=h.DisplayName);
 ## Known Limitations
 - Can generate invalid positions if the line extends beyond the plot box.
   Only signfiicant when line extends beyond the box or approaches infinity.
+- Plotting large numbers of labels can be slow, as a call to `drawnow` is
+  forced to draw each label.
 
 ## References
 Initial inspiration came from practice of using a node
-in the trailing plot commands within [pgfplot](https://tikz.dev/pgfplots/reference-annotations#sec-4.17.3)
+in the trailing plot commands within [pgfplot](https://tikz.dev/pgfplots/reference-annotations#sec-4.17.3).
 
 The [NoLegend](https://www.mathworks.com/matlabcentral/fileexchange/51163-nolegend-labeling-lines-directly-instead-of-using-legends)
 package performs a similar task.  It does handle log scales, but it

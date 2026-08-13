@@ -163,8 +163,13 @@ label_line(h, 0.5, Sloped=true);
 
 %% ex0.9 log
 x = linspace(1, 10, 100);
-figure(Name="ex0.9 log", Units="inches", Position=[1,1,12,4])
-tiledlayout(1, 3);
+figure(Name="ex0.9 log", Units="inches", Position=[1,1,6, 6])
+tiledlayout(2, 2, TileSpacing="compact", Padding="compact");
+
+ha = nexttile;hold on;box on;grid on;
+title("Linear", FontWeight="normal")
+h = plot(x, x.^2, DisplayName="x^2");
+label_line(h, [0.2, 0.5, 0.8], Sloped=true);
 
 ha = nexttile;hold on;box on;grid on;
 title("Semi-Log X", FontWeight="normal")
@@ -184,6 +189,8 @@ h = plot(x, x.^2, DisplayName="x^2");
 ha.XScale = "log";
 ha.YScale = "log";
 label_line(h, [0.2, 0.5, 0.8], Sloped=true);
+
+exportgraphics(gcf, "ex09.png");
 
 
 
