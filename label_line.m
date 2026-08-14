@@ -1,4 +1,4 @@
-function hlabel = label_line(h, pos, opts)
+function [hlabel, hpin] = label_line(h, pos, opts)
 % label_line put text label near line
 %
 % Prior to calling this function, the plot should be scaled to it's final
@@ -32,6 +32,20 @@ function hlabel = label_line(h, pos, opts)
 %              rotation angle
 %  Trim      - trim lines to plot box before doing position calcs
 %              defaults to true
+%  Pin       - Set to [Pin Angle (deg), Pin Length (pts)] to add a leader
+%              line to label.  When using the Pin option, the Location
+%              option will indicate where the pin terminates at the label
+%              Defaults to [], in which case no pin is drawn.
+%              If only a single number is provided, it will be treated as
+%              the pin angle, and the length will be 36 pts.
+%
+%  PIN Options (see Annotation, Arrow for more information)
+%  PinLineStyle - Pin line style, default '-'
+%  PinLineWidth - Pin line width, default 0.5
+%  PinHeadStyle - Pin head style, default "vback2"
+%  PinHeadLength - Length of arrowhead, in points, default 6
+%  PinHeadWidth  - Width of arrowhead, in points, default 6
+%  
 %
 % OPTIONS (used for development, not recommended)
 %  baseOffset- Baseline offset in direction of location
@@ -39,6 +53,7 @@ function hlabel = label_line(h, pos, opts)
 %                    When above, an additional effective offset is visible
 %                    because the text baseline is not at the bottom of the
 %                    box
+%  defaultPinLength - Default length for pin, 24
 %
 % Notes
 %  - Does not work with xline or yline, but these contain their own
@@ -66,6 +81,13 @@ arguments
     opts.BackgroundColor = "none";
     opts.Rotation (1, 1) double = 0;
     opts.Trim (1, 1) logical = true;
+    opts.Pin (1, :) double = [];
+    opts.defaultPinLength (1, 1) double = 24; % pts
+    opts.PinLineStyle (1, 1) string = "-";
+    opts.PinLineWidth (1, 1) double = 0.5;
+    opts.PinHeadStyle (1, 1) string = "vback2";
+    opts.PinHeadLength (1, 1) double = 6;
+    opts.PinHeadWidth (1, 1) double = 6;
 end
 
 % default color based on type
@@ -86,8 +108,9 @@ end
 
 % place text box
 hlabel = gobjects(size(xp));
+hpin = gobjects(size(xp));
 for i = 1:numel(xp)
-    hlabel(i) = make_text_box(xp(i), yp(i), ap(i), hf, opts);
+    [hlabel(i), hpin(i)] = make_text_box(xp(i), yp(i), ap(i), hf, opts);
 end
 
 end
@@ -257,7 +280,12 @@ yp = fy(pos);
 ap = fa(pos)+thetaAdj;
 end
 
-function hlabel = make_text_box(xp, yp, theta, hf, opts)
+
+
+
+function [hlabel, hpin] = make_text_box(xp, yp, theta, hf, opts)
+% make_text_box draw the text box and the pin
+% rotate label, and fix offsets after rotation
 unitsOld = hf.Units;
 hf.Units = "points";
 
@@ -282,8 +310,18 @@ elseif contains(opts.Location, "right")
     xoffset = +opts.baseOffset;
 end
 
-xoffset1 = xoffset + opts.xoffset;
-yoffset1 = yoffset + opts.yoffset;
+xpin = 0.0;
+ypin = 0.0;
+if ~isempty(opts.Pin)
+    if length(opts.Pin) < 2
+        opts.Pin = [opts.Pin, opts.defaultPinLength];
+    end
+    xpin = opts.Pin(2)*cosd(opts.Pin(1));
+    ypin = opts.Pin(2)*sind(opts.Pin(1));
+end
+
+xoffset1 = xoffset + opts.xoffset + xpin;
+yoffset1 = yoffset + opts.yoffset + ypin;
 
 if opts.Sloped
     % shift offsets relative to angle
@@ -310,39 +348,52 @@ hlabel = annotation(hf, "textbox", ...
     Position=[xp+xoffset2,yp+yoffset2,1, 1], ...
     FitBoxToText=true);
 
-if opts.Sloped || opts.Rotation ~= 0
-    % save default position, with size containing text
-    drawnow;
-    pos = hlabel.Position;
-    % copyobj(hlabel, hlabel.Parent);
+% save default position, with size containing text
+drawnow;
+pos = hlabel.Position;
+% copyobj(hlabel, hlabel.Parent);
 
+% offset to correct for rotation about the lower left corner
+% really want to rotate about the anchor point
+Lx = 0.5*pos(3);
+Ly = 0.5*pos(4);
+if contains(opts.Location, "left")
+    Lx = pos(3);
+elseif contains(opts.Location, "right")
+    Lx = 0.0;
+end
+if contains(opts.Location, "above")
+    Ly = 0.0;
+elseif contains(opts.Location, "below")
+    Ly = pos(4);
+end
+L = sqrt(Lx.^2+Ly.^2);
+alpha = atan2d(Ly, Lx);
+
+if opts.Sloped || opts.Rotation ~= 0
     % rotate label
     if ~opts.Sloped
         theta=opts.Rotation;
     end
     hlabel.Rotation = theta;
 
-    % offset to correct for rotation about the lower left corner
-    % really want to rotate about the anchor point
-    Lx = 0.5*pos(3);
-    Ly = 0.5*pos(4);
-    if contains(opts.Location, "left")
-        Lx = pos(3);
-    elseif contains(opts.Location, "right")
-        Lx = 0.0;
-    end
-    if contains(opts.Location, "above")
-        Ly = 0.0;
-    elseif contains(opts.Location, "below")
-        Ly = pos(4);
-    end
-    L = sqrt(Lx.^2+Ly.^2);
-    alpha = atan2d(Ly, Lx);
     hlabel.Position(1) = pos(1) + L*(cosd(alpha) - cosd(theta+alpha));
     hlabel.Position(2) = pos(2) + L*(sind(alpha) - sind(theta+alpha));
 end
 
-
+hpin = gobjects(1);
+if ~isempty(opts.Pin)
+    hpin = annotation(hf, "arrow", ...
+        Units="points", ...
+        X=[xp+xpin, xp], ...
+        Y=[yp+ypin, yp], ...
+        LineWidth=opts.PinLineWidth, ...
+        Color=opts.Color, ...
+        LineStyle=opts.PinLineStyle, ...
+        HeadStyle=opts.PinHeadStyle, ...
+        HeadLength=opts.PinHeadLength, ...
+        HeadWidth=opts.PinHeadWidth);
+end
 
 hf.Units = unitsOld;
 end

@@ -157,7 +157,7 @@ h = plot(x, sin(x), "-", DisplayName="sin(x)");
 label_line(h, 0.5, Sloped=true);
 
 h = plot(x, cos(x), "-", DisplayName="cos(x)");
-label_line(h, 0.25, Sloped=true);
+label_line(h, 0.25, Pin=45);
 exportgraphics(gcf, "ex07.png");
 
 
@@ -203,7 +203,7 @@ label_line(h, [0.2, 0.5, 0.8], Sloped=true);
 exportgraphics(gcf, "ex09.png");
 
 %% ex0.10 Trim
-x = logspace(-5, 0, 1000);
+x = logspace(-2, 0, 1000);
 figure(Name="ex0.10 trim", Units="inches", Position=[1,1,12, 4])
 tiledlayout(1, 3);
 
@@ -227,6 +227,44 @@ ha.XLim(1) = -0.2;
 ha.YLim(1) = -2;
 label_line(h, Sloped=true, Trim=false);
 % label drawn off-screen
+
+%% ex0.11 Pin Locations
+figure(Name="ex011 Pin Locations", Units="inches", Position=[1,1,4,2]);
+ha = axes;hold on;grid off;box on;
+ha.XLim = [-1, 1];
+ha.YLim = [-1, 1];
+ha.XTick = [];
+ha.YTick = [];
+title("Location Option with Pin Command", FontWeight="normal");
+
+h = plot(0, 0, ".");
+
+% label_line(h, String="left", Pin=0);
+% label_line(h, String="above left", Pin=45);
+% label_line(h, String="above", Pin=90);
+% label_line(h, String="above right", Pin=135);
+% label_line(h, String="right", Pin=180);
+% label_line(h, String="below right", Pin=225);
+% label_line(h, String="below", Pin=270);
+% label_line(h, String="below left", Pin=315);
+
+% label_line(h, String="left"       , Location="left"       , BaseOffset=18);
+% label_line(h, String="above left" , Location="above left" , BaseOffset=18);
+% label_line(h, String="above"      , Location="above"      , BaseOffset=18);
+% label_line(h, String="above right", Location="above right", BaseOffset=18);
+% label_line(h, String="right"      , Location="right"      , BaseOffset=18);
+% label_line(h, String="below right", Location="below right", BaseOffset=18);
+% label_line(h, String="below"      , Location="below"      , BaseOffset=18);
+% label_line(h, String="below left" , Location="below left" , BaseOffset=18);
+
+label_line(h, String="left"       , Location="left"       , Pin=180);
+label_line(h, String="above left" , Location="above left" , Pin=135);
+label_line(h, String="above"      , Location="above"      , Pin=90 );
+label_line(h, String="above right", Location="above right", Pin=45 );
+label_line(h, String="right"      , Location="right"      , Pin=0  );
+label_line(h, String="below right", Location="below right", Pin=315);
+label_line(h, String="below"      , Location="below"      , Pin=270);
+label_line(h, String="below left" , Location="below left" , Pin=225);
 
 
 
