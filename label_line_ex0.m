@@ -202,6 +202,32 @@ label_line(h, [0.2, 0.5, 0.8], Sloped=true);
 
 exportgraphics(gcf, "ex09.png");
 
+%% ex0.10 Trim
+x = logspace(-5, 0, 1000);
+figure(Name="ex0.10 trim", Units="inches", Position=[1,1,12, 4])
+tiledlayout(1, 3);
+
+ha = nexttile;hold on;grid off;box on;
+title("Full Range", FontWeight="normal");
+h = plot(x, log(x), DisplayName="log(x)");
+ha.XLim(1) = -0.2;
+label_line(h, Sloped=true);
+
+ha = nexttile;hold on;grid off;box on;
+title("Partial range with trim", FontWeight="normal");
+h = plot(x, log(x), DisplayName="log(x)");
+ha.XLim(1) = -0.2;
+ha.YLim(1) = -2;
+label_line(h, Sloped=true);
+
+ha = nexttile;hold on;grid off;box on;
+title("Partial range without trim", FontWeight="normal");
+h = plot(x, log(x), DisplayName="log(x)");
+ha.XLim(1) = -0.2;
+ha.YLim(1) = -2;
+label_line(h, Sloped=true, Trim=false);
+% label drawn off-screen
+
 
 
 

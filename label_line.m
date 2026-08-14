@@ -5,11 +5,10 @@ function hlabel = label_line(h, pos, opts)
 % size.  The offsets and slope are done in screen coordinates.
 % Each label drawn will force a call to drawnow, may be slow for a large
 % number of labels, but this is not the anticipated use case.
-%
-% Not all edge cases are handled well.  Some specific problem areas
-%  - relative position is based on an integrated length, some of this
-%  length may be off-screen.  Particularly troubling for a clipped plot
-%  approaching infinity.
+% 
+% It's possible for the label to be rendered off-screen.  The default Trim
+% option prevents this for most cases, but no check is performed to
+% guarantee the label is visible.
 %
 % INPUTS:
 %  h        - handle to graphics object
@@ -31,6 +30,8 @@ function hlabel = label_line(h, pos, opts)
 %  Rotation  - Rotation angle in degrees, defaults to 0
 %              when Sloped is true, this is an adjustment to the base
 %              rotation angle
+%  Trim      - trim lines to plot box before doing position calcs
+%              defaults to true
 %
 % OPTIONS (used for development, not recommended)
 %  baseOffset- Baseline offset in direction of location
@@ -64,6 +65,7 @@ arguments
     opts.baseOffsetBelow (1, 1) double = 2;
     opts.BackgroundColor = "none";
     opts.Rotation (1, 1) double = 0;
+    opts.Trim (1, 1) logical = true;
 end
 
 % default color based on type
@@ -74,7 +76,7 @@ elseif isempty(opts.Color) && isa(h, "matlab.graphics.chart.primitive.Scatter")
 end
 
 % convert to screen coordinates
-[xs, ys, ~, ~, hf] = data_to_screen(h);
+[xs, ys, ~, ~, hf] = data_to_screen(h, opts.Trim);
 
 % patch nan's
 [xs1, ys1] = patch_nans(xs, ys);
@@ -90,7 +92,7 @@ end
 
 end
 
-function [xs, ys, scaleX, scaleY, hf] = data_to_screen(h)
+function [xs, ys, scaleX, scaleY, hf] = data_to_screen(h, trim)
 % convert data coordiantes to screen coordinates in points
 ha = h.Parent;
 
@@ -137,6 +139,17 @@ scaleY = screenHeight./dataHeight ...
     .* ha.PlotBoxAspectRatio(2)./ha.PlotBoxAspectRatio(1) ...
     .* screenWidth./screenHeight;
 ys = y.*scaleY+pos(2);
+
+
+% trim data to axis limits
+if trim
+    idx = h.XData < ha.XLim(1) ...
+        | h.XData > ha.XLim(2) ...
+        | h.YData < ha.YLim(1) ...
+        | h.YData > ha.YLim(2);
+    xs(idx) = nan;
+    ys(idx) = nan;
+end
 
 end
 
@@ -327,26 +340,6 @@ if opts.Sloped || opts.Rotation ~= 0
     alpha = atan2d(Ly, Lx);
     hlabel.Position(1) = pos(1) + L*(cosd(alpha) - cosd(theta+alpha));
     hlabel.Position(2) = pos(2) + L*(sind(alpha) - sind(theta+alpha));
-    % if opts.Location == "above"
-    %     hlabel.Position(2) = pos(2) - 0.5*pos(3)*sind(theta);
-    %     hlabel.Position(1) = pos(1) + 0.5*pos(3)*(1-cosd(theta));
-    % elseif opts.Location == "below"
-    %     L = sqrt(pos(4).^2 + 0.25*pos(3).^2);
-    %     alpha = atand(pos(4)/(0.5*pos(3)));
-    %     hlabel.Position(1) = pos(1) - L*cosd(theta+alpha) + 0.5*pos(3);
-    %     hlabel.Position(2) = pos(2) - L*sind(theta+alpha) + pos(4);
-    % elseif opts.Location == "below right"
-    %     hlabel.Position(1) = pos(1) + pos(4)*sind(theta);
-    %     hlabel.Position(2) = pos(2) + pos(4)*(1-cosd(theta));
-    % elseif opts.Location == "above left"
-    %     hlabel.Position(1) = pos(1) + pos(3)*(1-cosd(theta));
-    %     hlabel.Position(2) = pos(2) - pos(3)*sind(theta);
-    % elseif opts.Location == "below left"
-    %     L = sqrt(pos(4).^2+pos(3).^2);
-    %     alpha = atand(pos(4)/pos(3));
-    %     hlabel.Position(1) = pos(1) + pos(3) - L*cosd(theta+alpha);
-    %     hlabel.Position(2) = pos(2) + pos(4) - L*sind(theta+alpha);
-    % end
 end
 
 

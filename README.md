@@ -99,8 +99,6 @@ label_line(h, location=h.DisplayName);
 ![LocationOpts](ex01.png)
 
 ## Known Limitations
-- Can generate invalid positions if the line extends beyond the plot box.
-  Most signfiicant when line extends well beyond the box or approaches infinity.
 - Plotting large numbers of labels can be slow, as a call to `drawnow` is
   forced to draw each label.
 - Only `Line` and `Scatter` objects are supported.  Note that `xline` and
