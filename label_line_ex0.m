@@ -176,7 +176,7 @@ x = linspace(1, 10, 100);
 figure(Name="ex0.9 log", Units="inches", Position=[1,1,6, 6])
 tiledlayout(2, 2, TileSpacing="compact", Padding="compact");
 
-ha = nexttile;hold on;box on;grid on;
+nexttile;hold on;box on;grid on;
 title("Linear", FontWeight="normal")
 h = plot(x, x.^2, DisplayName="x^2");
 label_line(h, [0.2, 0.5, 0.8], Sloped=true);
@@ -257,14 +257,14 @@ h = plot(0, 0, ".");
 % label_line(h, String="below"      , Location="below"      , BaseOffset=18);
 % label_line(h, String="below left" , Location="below left" , BaseOffset=18);
 
-label_line(h, String="left"       , Location="left"       , Pin=180);
-label_line(h, String="above left" , Location="above left" , Pin=135);
-label_line(h, String="above"      , Location="above"      , Pin=90 );
-label_line(h, String="above right", Location="above right", Pin=45 );
-label_line(h, String="right"      , Location="right"      , Pin=0  );
-label_line(h, String="below right", Location="below right", Pin=315);
-label_line(h, String="below"      , Location="below"      , Pin=270);
-label_line(h, String="below left" , Location="below left" , Pin=225);
+label_line(h, String="left"       , Location="left"       , Pin=180, PinOffset=2);
+label_line(h, String="above left" , Location="above left" , Pin=135, PinOffset=2);
+label_line(h, String="above"      , Location="above"      , Pin=90 , PinOffset=2);
+label_line(h, String="above right", Location="above right", Pin=45 , PinOffset=2);
+label_line(h, String="right"      , Location="right"      , Pin=0  , PinOffset=2);
+label_line(h, String="below right", Location="below right", Pin=315, PinOffset=2);
+label_line(h, String="below"      , Location="below"      , Pin=270, PinOffset=2);
+label_line(h, String="below left" , Location="below left" , Pin=225, PinOffset=2);
 
 
 

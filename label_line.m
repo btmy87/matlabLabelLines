@@ -40,11 +40,13 @@ function [hlabel, hpin] = label_line(h, pos, opts)
 %              the pin angle, and the length will be 36 pts.
 %
 %  PIN Options (see Annotation, Arrow for more information)
-%  PinLineStyle - Pin line style, default '-'
-%  PinLineWidth - Pin line width, default 0.5
-%  PinHeadStyle - Pin head style, default "vback2"
+%  PinLineStyle  - Pin line style, default '-'
+%  PinLineWidth  - Pin line width, default 0.5
+%  PinHeadStyle  - Pin head style, default "vback2"
 %  PinHeadLength - Length of arrowhead, in points, default 6
 %  PinHeadWidth  - Width of arrowhead, in points, default 6
+%  PinOffset     - Offset from end of pin to line
+%                  Note this is not a standard annotation option
 %  
 %
 % OPTIONS (used for development, not recommended)
@@ -87,7 +89,8 @@ arguments
     opts.PinLineWidth (1, 1) double = 0.5;
     opts.PinHeadStyle (1, 1) string = "vback2";
     opts.PinHeadLength (1, 1) double = 6;
-    opts.PinHeadWidth (1, 1) double = 6;
+    opts.PinHeadWidth (1, 1) double = 4;
+    opts.PinOffset (1, 1) double = 1;
 end
 
 % default color based on type
@@ -385,8 +388,8 @@ hpin = gobjects(1);
 if ~isempty(opts.Pin)
     hpin = annotation(hf, "arrow", ...
         Units="points", ...
-        X=[xp+xpin, xp], ...
-        Y=[yp+ypin, yp], ...
+        X=[xp+xpin, xp+opts.PinOffset*cosd(opts.Pin(1))], ...
+        Y=[yp+ypin, yp+opts.PinOffset*sind(opts.Pin(1))], ...
         LineWidth=opts.PinLineWidth, ...
         Color=opts.Color, ...
         LineStyle=opts.PinLineStyle, ...
