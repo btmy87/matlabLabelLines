@@ -24,7 +24,9 @@ function [hlabel, hpin] = label_line(h, pos, opts)
 %  Location  - string with location of label relative to plot.  Should be
 %              one of "above", "below", "left", "right", "above left", 
 %              "above right", "below left", "below right", "center".
-%              Defaults to "above"
+%              Defaults to "above" if the pin option isn't used
+%              When the Pin option is used, a suitable location is selected
+%              based on the pin angle.
 %  Color     - label string color, defaults to h.Color
 %  BackgroundColor - label background color, defaults to none
 %  Rotation  - Rotation angle in degrees, defaults to 0
@@ -61,8 +63,10 @@ function [hlabel, hpin] = label_line(h, pos, opts)
 %  - Does not work with xline or yline, but these contain their own
 %    label options
 %
-% TODO: Add pin option
 % TODO: Consider x-position option to set label at specific x coord
+%       Or maybe a specific index
+% TODO: How do we address deprecation of mustBeInRange, but still work
+%       in older versions
 
 arguments
     h (1, 1) {mustBeA(h, [ ...
@@ -74,7 +78,7 @@ arguments
     opts.Location (1, 1) string {mustBeMember(opts.Location, ...
         ["above", "below", "left", "right", ...
         "above left", "above right", "below left", "below right", ...
-        "center"])} = "above";
+        "center", ""])} = "";
     opts.xoffset (1, 1) double = 0;
     opts.yoffset (1, 1) double = 0;
     opts.Color = [];
@@ -100,6 +104,33 @@ elseif isempty(opts.Color) && isa(h, "matlab.graphics.chart.primitive.Scatter")
     opts.Color = h.Parent.XColor;
 end
 
+% default location based on Pin option
+if isempty(opts.Pin) && opts.Location == ""
+    opts.Location = "above";
+elseif ~isempty(opts.Pin) && opts.Location == ""
+    % reasonable location based on pin angle
+    ang = mod(opts.Pin, 360); % force to 0-360
+    if ang < (0+22.5)
+        opts.Location = "right";
+    elseif ang < (45+22.5)
+        opts.Location = "above right";
+    elseif ang < (90+22.5)
+        opts.Location = "above";
+    elseif ang < (135+22.5)
+        opts.Location = "above left";
+    elseif ang < (180+22.5)
+        opts.Location = "left";
+    elseif ang < (225+22.5)
+        opts.Location = "below left";
+    elseif ang < (270+22.5)
+        opts.Location = "below";
+    elseif ang < (315+22.5)
+        opts.Location = "below right";
+    else
+        opts.Location = "right";
+    end
+end
+
 % convert to screen coordinates
 [xs, ys, ~, ~, hf] = data_to_screen(h, opts.Trim);
 
@@ -119,7 +150,7 @@ end
 end
 
 function [xs, ys, scaleX, scaleY, hf] = data_to_screen(h, trim)
-% convert data coordiantes to screen coordinates in points
+% convert data coordinates to screen coordinates in points
 ha = h.Parent;
 
 % walk up parent chain until we find a figure
@@ -141,7 +172,7 @@ pos = getpixelposition(ha)./DPI.*POINTS_PER_INCH;
 screenWidth = pos(3);
 screenHeight = pos(4);
 
-% inferred aspect raito from pixelposition doesn't match what's actually on
+% inferred aspect ratio from pixelposition doesn't match what's actually on
 % screen.  Actual display aligns with PlotBoxAspectRatio.  This correction
 % seems to work
 if ha.XScale == "linear"

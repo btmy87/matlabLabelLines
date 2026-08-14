@@ -98,6 +98,37 @@ label_line(h, location=h.DisplayName);
 ```
 ![LocationOpts](ex01.png)
 
+## Default Location with Pin Option
+When the pin option is used, a default location is selected based on the
+pin angle.  This can be overridden by specifying a location.  In this 
+context, the location option can be non-intuitive.  The location option 
+sets the pin text and pin anchor point at the opposite corner.  When
+`Location="above right"` the pin connects to the bottom left corner
+of the text.  So the text is "above right" of the back of the pin.
+
+``` matlab
+figure(Name="ex011 Pin Locations", Units="inches", Position=[1,1,4,2]);
+ha = axes;hold on;grid off;box on;
+ha.XLim = [-1, 1];
+ha.YLim = [-1, 1];
+ha.XTick = [];
+ha.YTick = [];
+title("Default Location Option with Pin Command", FontWeight="normal");
+
+h = plot(0, 0, ".");
+
+label_line(h, String="left"       , Pin=180, PinOffset=2);
+label_line(h, String="above left" , Pin=135, PinOffset=2);
+label_line(h, String="above"      , Pin=90 , PinOffset=2);
+label_line(h, String="above right", Pin=45 , PinOffset=2);
+label_line(h, String="right"      , Pin=0  , PinOffset=2);
+label_line(h, String="below right", Pin=315, PinOffset=2);
+label_line(h, String="below"      , Pin=270, PinOffset=2);
+label_line(h, String="below left" , Pin=225, PinOffset=2);
+```
+
+![LocationPin](ex11.png)
+
 ## Known Limitations
 - Plotting large numbers of labels can be slow, as a call to `drawnow` is
   forced to draw each label.

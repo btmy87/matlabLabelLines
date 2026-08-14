@@ -13,7 +13,6 @@ ylabel("y");
 x = linspace(-1, 1, 201);
 y = x.^2;
 h = plot(x, y, DisplayName="f(x)=x^2");
-% h = plot(x, y, DisplayName="my line");
 ha.XLim = [-1.1, 1.1];
 ha.YLim = [-0.1, 1.1];
 
@@ -22,7 +21,6 @@ label_line(h, Color=ha.XColor, yoffset=2);
 
 % multiple labels can be drawn with multiple position entries
 label_line(h, 0.1:0.2:0.9, location="below", Sloped=true);
-% label_line(h, 0.7, location="below right", sloped=true);
 
 %% ex0.1 Demonstrate Position Options
 figure(Name="ex0.1 Location Options", Units="inches", Position=[1,1,6,4])
@@ -81,8 +79,6 @@ for thisloc = locs
     ha.YLim = [-1, 1]*1.2;
     ha.XTick = [];
     ha.YTick = [];
-    % ha.XAxis.Visible = "off";
-    % ha.YAxis.Visible = "off";
     ha.Color = hf.Color;
     title(thisloc, FontWeight="normal");
     drawnow;
@@ -235,37 +231,19 @@ ha.XLim = [-1, 1];
 ha.YLim = [-1, 1];
 ha.XTick = [];
 ha.YTick = [];
-title("Location Option with Pin Command", FontWeight="normal");
+title("Default Location Option with Pin Command", FontWeight="normal");
 
 h = plot(0, 0, ".");
 
-% label_line(h, String="left", Pin=0);
-% label_line(h, String="above left", Pin=45);
-% label_line(h, String="above", Pin=90);
-% label_line(h, String="above right", Pin=135);
-% label_line(h, String="right", Pin=180);
-% label_line(h, String="below right", Pin=225);
-% label_line(h, String="below", Pin=270);
-% label_line(h, String="below left", Pin=315);
+label_line(h, String="left"       , Pin=180, PinOffset=2);
+label_line(h, String="above left" , Pin=135, PinOffset=2);
+label_line(h, String="above"      , Pin=90 , PinOffset=2);
+label_line(h, String="above right", Pin=45 , PinOffset=2);
+label_line(h, String="right"      , Pin=0  , PinOffset=2);
+label_line(h, String="below right", Pin=315, PinOffset=2);
+label_line(h, String="below"      , Pin=270, PinOffset=2);
+label_line(h, String="below left" , Pin=225, PinOffset=2);
 
-% label_line(h, String="left"       , Location="left"       , BaseOffset=18);
-% label_line(h, String="above left" , Location="above left" , BaseOffset=18);
-% label_line(h, String="above"      , Location="above"      , BaseOffset=18);
-% label_line(h, String="above right", Location="above right", BaseOffset=18);
-% label_line(h, String="right"      , Location="right"      , BaseOffset=18);
-% label_line(h, String="below right", Location="below right", BaseOffset=18);
-% label_line(h, String="below"      , Location="below"      , BaseOffset=18);
-% label_line(h, String="below left" , Location="below left" , BaseOffset=18);
-
-label_line(h, String="left"       , Location="left"       , Pin=180, PinOffset=2);
-label_line(h, String="above left" , Location="above left" , Pin=135, PinOffset=2);
-label_line(h, String="above"      , Location="above"      , Pin=90 , PinOffset=2);
-label_line(h, String="above right", Location="above right", Pin=45 , PinOffset=2);
-label_line(h, String="right"      , Location="right"      , Pin=0  , PinOffset=2);
-label_line(h, String="below right", Location="below right", Pin=315, PinOffset=2);
-label_line(h, String="below"      , Location="below"      , Pin=270, PinOffset=2);
-label_line(h, String="below left" , Location="below left" , Pin=225, PinOffset=2);
-
-
+exportgraphics(gcf, "ex11.png");
 
 
