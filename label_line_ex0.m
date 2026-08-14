@@ -28,7 +28,7 @@ label_line(h, 0.1:0.2:0.9, location="below", Sloped=true);
 figure(Name="ex0.1 Location Options", Units="inches", Position=[1,1,6,4])
 ha = axes("defaultLineMarkerSize",12);hold on;box on;grid off
 ha.XLim = [-1, 3];
-ha.YLim = [-1, 2];
+ha.YLim = [-1, 3];
 ha.XTick = [];
 ha.YTick = [];
 
@@ -41,13 +41,22 @@ label_line(h, location=h.DisplayName);
 h = plot(2, 0, ".", DisplayName="below right");
 label_line(h, location=h.DisplayName);
 
-h = plot(0, 1, ".", DisplayName="above left");
+h = plot(0, 1, ".", DisplayName="left");
 label_line(h, location=h.DisplayName);
 
-h = plot(1, 1, ".", DisplayName="above");
+h = plot(1, 1, ".", DisplayName="center");
 label_line(h, location=h.DisplayName);
 
-h = plot(2, 1, ".", DisplayName="above right");
+h = plot(2, 1, ".", DisplayName="right");
+label_line(h, location=h.DisplayName);
+
+h = plot(0, 2, ".", DisplayName="above left");
+label_line(h, location=h.DisplayName);
+
+h = plot(1, 2, ".", DisplayName="above");
+label_line(h, location=h.DisplayName);
+
+h = plot(2, 2, ".", DisplayName="above right");
 label_line(h, location=h.DisplayName);
 
 exportgraphics(gcf, "ex01.png");
@@ -60,11 +69,12 @@ x = cos(theta);
 y = sin(theta);
 
 locs = ["above left", "above", "above right", ...
+        "left", "center", "right", ...
         "below left", "below", "below right"];
 
 hf = figure(Name="ex0.2 Slope with Options", ...
-    Units="inches", Position=[1,1,12,8]);
-tiledlayout(2, 3, TileSpacing="compact", Padding="compact");
+    Units="inches", Position=[1,1,10, 10]);
+tiledlayout(3, 3, TileSpacing="compact", Padding="compact");
 for thisloc = locs
     ha = nexttile;hold on;box on;grid off
     ha.XLim = [-1, 1]*1.2;

@@ -9,7 +9,7 @@ function hlabel = label_line(h, pos, opts)
 % Not all edge cases are handled well.  Some specific problem areas
 %  - relative position is based on an integrated length, some of this
 %  length may be off-screen.  Particularly troubling for a clipped plot
-%  approahcing infinity.
+%  approaching infinity.
 %
 % INPUTS:
 %  h        - handle to graphics object
@@ -248,24 +248,25 @@ function hlabel = make_text_box(xp, yp, theta, hf, opts)
 unitsOld = hf.Units;
 hf.Units = "points";
 
-vert = "bottom";
-horz = "center";
-xoffset = 0;
-yoffset = opts.baseOffset;
+
+vert = "middle";
+yoffset = -0.5*opts.baseOffsetBelow;
 if contains(opts.Location, "below")
     vert = "top";
     yoffset = -opts.baseOffset-opts.baseOffsetBelow;
-elseif contains(opts.Location, "center")
-    vert = "middle";
-    yoffset = 0;
+elseif contains(opts.Location, "above")
+    vert = "bottom";
+    yoffset = opts.baseOffset;
 end
 
+horz = "center";
+xoffset = 0;
 if contains(opts.Location, "left")
     horz="right";
     xoffset = -opts.baseOffset;
 elseif contains(opts.Location, "right")
     horz="left";
-    xoffset = opts.baseOffset;
+    xoffset = +opts.baseOffset;
 end
 
 xoffset1 = xoffset + opts.xoffset;
@@ -310,27 +311,42 @@ if opts.Sloped || opts.Rotation ~= 0
 
     % offset to correct for rotation about the lower left corner
     % really want to rotate about the anchor point
-    % no correction needed for "above right"
-    if opts.Location == "above"
-        hlabel.Position(2) = pos(2) - 0.5*pos(3)*sind(theta);
-        hlabel.Position(1) = pos(1) + 0.5*pos(3)*(1-cosd(theta));
-    elseif opts.Location == "below"
-        L = sqrt(pos(4).^2 + 0.25*pos(3).^2);
-        alpha = atand(pos(4)/(0.5*pos(3)));
-        hlabel.Position(1) = pos(1) - L*cosd(theta+alpha) + 0.5*pos(3);
-        hlabel.Position(2) = pos(2) - L*sind(theta+alpha) + pos(4);
-    elseif opts.Location == "below right"
-        hlabel.Position(1) = pos(1) + pos(4)*sind(theta);
-        hlabel.Position(2) = pos(2) + pos(4)*(1-cosd(theta));
-    elseif opts.Location == "above left"
-        hlabel.Position(1) = pos(1) + pos(3)*(1-cosd(theta));
-        hlabel.Position(2) = pos(2) - pos(3)*sind(theta);
-    elseif opts.Location == "below left"
-        L = sqrt(pos(4).^2+pos(3).^2);
-        alpha = atand(pos(4)/pos(3));
-        hlabel.Position(1) = pos(1) + pos(3) - L*cosd(theta+alpha);
-        hlabel.Position(2) = pos(2) + pos(4) - L*sind(theta+alpha);
+    Lx = 0.5*pos(3);
+    Ly = 0.5*pos(4);
+    if contains(opts.Location, "left")
+        Lx = pos(3);
+    elseif contains(opts.Location, "right")
+        Lx = 0.0;
     end
+    if contains(opts.Location, "above")
+        Ly = 0.0;
+    elseif contains(opts.Location, "below")
+        Ly = pos(4);
+    end
+    L = sqrt(Lx.^2+Ly.^2);
+    alpha = atan2d(Ly, Lx);
+    hlabel.Position(1) = pos(1) + L*(cosd(alpha) - cosd(theta+alpha));
+    hlabel.Position(2) = pos(2) + L*(sind(alpha) - sind(theta+alpha));
+    % if opts.Location == "above"
+    %     hlabel.Position(2) = pos(2) - 0.5*pos(3)*sind(theta);
+    %     hlabel.Position(1) = pos(1) + 0.5*pos(3)*(1-cosd(theta));
+    % elseif opts.Location == "below"
+    %     L = sqrt(pos(4).^2 + 0.25*pos(3).^2);
+    %     alpha = atand(pos(4)/(0.5*pos(3)));
+    %     hlabel.Position(1) = pos(1) - L*cosd(theta+alpha) + 0.5*pos(3);
+    %     hlabel.Position(2) = pos(2) - L*sind(theta+alpha) + pos(4);
+    % elseif opts.Location == "below right"
+    %     hlabel.Position(1) = pos(1) + pos(4)*sind(theta);
+    %     hlabel.Position(2) = pos(2) + pos(4)*(1-cosd(theta));
+    % elseif opts.Location == "above left"
+    %     hlabel.Position(1) = pos(1) + pos(3)*(1-cosd(theta));
+    %     hlabel.Position(2) = pos(2) - pos(3)*sind(theta);
+    % elseif opts.Location == "below left"
+    %     L = sqrt(pos(4).^2+pos(3).^2);
+    %     alpha = atand(pos(4)/pos(3));
+    %     hlabel.Position(1) = pos(1) + pos(3) - L*cosd(theta+alpha);
+    %     hlabel.Position(2) = pos(2) + pos(4) - L*sind(theta+alpha);
+    % end
 end
 
 

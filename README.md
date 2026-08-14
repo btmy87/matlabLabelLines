@@ -78,22 +78,34 @@ label_line(h, location=h.DisplayName);
 h = plot(2, 0, ".", DisplayName="below right");
 label_line(h, location=h.DisplayName);
 
-h = plot(0, 1, ".", DisplayName="above left");
+h = plot(0, 1, ".", DisplayName="left");
 label_line(h, location=h.DisplayName);
 
-h = plot(1, 1, ".", DisplayName="above");
+h = plot(1, 1, ".", DisplayName="center");
 label_line(h, location=h.DisplayName);
 
-h = plot(2, 1, ".", DisplayName="above right");
+h = plot(2, 1, ".", DisplayName="right");
+label_line(h, location=h.DisplayName);
+
+h = plot(0, 2, ".", DisplayName="above left");
+label_line(h, location=h.DisplayName);
+
+h = plot(1, 2, ".", DisplayName="above");
+label_line(h, location=h.DisplayName);
+
+h = plot(2, 2, ".", DisplayName="above right");
 label_line(h, location=h.DisplayName);
 ```
 ![LocationOpts](ex01.png)
 
 ## Known Limitations
 - Can generate invalid positions if the line extends beyond the plot box.
-  Only signfiicant when line extends beyond the box or approaches infinity.
+  Most signfiicant when line extends well beyond the box or approaches infinity.
 - Plotting large numbers of labels can be slow, as a call to `drawnow` is
   forced to draw each label.
+- Only `Line` and `Scatter` objects are supported.  Note that `xline` and
+  `yline`, which produce `ConstantLine` objects, have their own label 
+  options.
 
 ## References
 Initial inspiration came from practice of using a node
