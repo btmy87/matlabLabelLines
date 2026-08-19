@@ -145,15 +145,16 @@ label_line(h, 0.2, Sloped=false, Rotation=10, String="No Slope + Rot.=10");
 %% ex0.7
 x = linspace(0, 2*pi, 101);
 
-figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,6,4]);
+% figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,6,4]);
+figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,4,3]);
 ha = axes;hold on;grid off;box on;
 ha.XLim = [0, 2*pi];
 ha.YLim = [-1, 1]*1.1;
 h = plot(x, sin(x), "-", DisplayName="sin(x)");
-label_line(h, 0.5, Sloped=true);
+label_line(h, 0.5, Pin=45);
 
 h = plot(x, cos(x), "-", DisplayName="cos(x)");
-label_line(h, 0.25, Pin=45);
+label_line(h, 0.25, Sloped=true);
 exportgraphics(gcf, "ex07.png");
 
 
@@ -245,5 +246,21 @@ label_line(h, String="below"      , Pin=270, PinOffset=2);
 label_line(h, String="below left" , Pin=225, PinOffset=2);
 
 exportgraphics(gcf, "ex11.png");
+
+%% ex0.12 multiline text
+x = linspace(0, 2*pi, 101);
+
+% figure(Name="ex0.7 sin cos", Units="inches", Position=[1,1,6,4]);
+figure(Name="ex0.12 multiline text", Units="inches", Position=[1,1,4,3]);
+ha = axes;hold on;grid off;box on;
+ha.XLim = [0, 2*pi];
+ha.YLim = [-1, 1]*1.1;
+h = plot(x, sin(x), "-", DisplayName="sin(x)");
+label_line(h, 0.5, Pin=60, String=["This line is","sin(x)"]);
+
+h = plot(x, cos(x), "-", DisplayName="cos(x)");
+label_line(h, 0.25, Sloped=true);
+
+
 
 

@@ -16,6 +16,7 @@ function [hlabel, hpin] = label_line(h, pos, opts)
 %             if given as array, multiple labels are placed
 % OPTIONS (name/value pairs)
 %  String    - label string, defaults to h.DisplayName
+%              pass an array of strings for multi-line text
 %  xoffset   - force additional offset in the X direction, points
 %  yoffset   - force additional offset in the Y direction, points
 %  Sloped    - logical, default to false which displays text at 0 angle
@@ -73,7 +74,7 @@ arguments
         "matlab.graphics.chart.primitive.Line", ...
         "matlab.graphics.chart.primitive.Scatter"])}
     pos (1, :) double {mustBeInRange(pos, 0, 1, "inclusive")} = 0.5
-    opts.String (1, 1) string = h.DisplayName
+    opts.String (:, 1) string = h.DisplayName
     opts.Sloped (1, 1) logical = false;
     opts.Location (1, 1) string {mustBeMember(opts.Location, ...
         ["above", "below", "left", "right", ...
